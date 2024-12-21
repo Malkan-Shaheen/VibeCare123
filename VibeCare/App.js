@@ -1,12 +1,32 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import SignupScreen from './screens/SignupScreen';
+import GenderSelectionScreen from './screens/GenderSelectionScreen';
+import AgeSelectionScreen from './screens/AgeMPage';
+import Relation from './screens/Relation';
+import LivingSituationPage from './screens/LivingSituationPage';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+    <NavigationContainer>
       <StatusBar style="auto" />
-    </View>
+      <Stack.Navigator initialRouteName="Signup">
+        <Stack.Screen 
+          name="Signup" 
+          component={SignupScreen} 
+          options={{ headerShown: false }} // hides default header
+        />
+         <Stack.Screen name="GenderSelectionScreen" component={GenderSelectionScreen}  options={{ headerShown: false }} />
+            <Stack.Screen name="AgeSelectionScreen" component={AgeSelectionScreen}  options={{ headerShown: false }} />
+            <Stack.Screen name="Relation" component={Relation}  options={{ headerShown: false }} />
+            <Stack.Screen name="LivingSituationPage" component={LivingSituationPage}  options={{ headerShown: false }}  />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
