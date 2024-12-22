@@ -8,6 +8,9 @@ import GenderSelectionScreen from './screens/GenderSelectionScreen';
 import AgeSelectionScreen from './screens/AgeMPage';
 import Relation from './screens/Relation';
 import LivingSituationPage from './screens/LivingSituationPage';
+import SigninScreen from './screens/SigninScreen';
+
+
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +28,8 @@ export default function App() {
             <Stack.Screen name="AgeSelectionScreen" component={AgeSelectionScreen}  options={{ headerShown: false }} />
             <Stack.Screen name="Relation" component={Relation}  options={{ headerShown: false }} />
             <Stack.Screen name="LivingSituationPage" component={LivingSituationPage}  options={{ headerShown: false }}  />
+            <Stack.Screen name="SigninScreen" component={SigninScreen}  options={{ headerShown: false }}  />
+            
       </Stack.Navigator>
     </NavigationContainer>
   );
