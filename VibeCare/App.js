@@ -9,6 +9,7 @@ import AgeSelectionScreen from './screens/AgeMPage';
 import Relation from './screens/Relation';
 import LivingSituationPage from './screens/LivingSituationPage';
 import SigninScreen from './screens/SigninScreen';
+import ExploreScreen from './screens/ExploreScreen';
 
 
 
@@ -29,6 +30,7 @@ export default function App() {
             <Stack.Screen name="Relation" component={Relation}  options={{ headerShown: false }} />
             <Stack.Screen name="LivingSituationPage" component={LivingSituationPage}  options={{ headerShown: false }}  />
             <Stack.Screen name="SigninScreen" component={SigninScreen}  options={{ headerShown: false }}  />
+            <Stack.Screen name="ExploreScreen" component={ExploreScreen}  options={{ headerShown: false }}  />
             
       </Stack.Navigator>
     </NavigationContainer>
