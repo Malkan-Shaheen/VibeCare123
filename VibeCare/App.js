@@ -10,6 +10,7 @@ import Relation from './screens/Relation';
 import LivingSituationPage from './screens/LivingSituationPage';
 import SigninScreen from './screens/SigninScreen';
 import ExploreScreen from './screens/ExploreScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
 
 
 
@@ -19,12 +20,13 @@ export default function App() {
   return (
     <NavigationContainer>
       <StatusBar style="auto" />
-      <Stack.Navigator initialRouteName="Signup">
+      <Stack.Navigator initialRouteName="WelcomeScreen">
         <Stack.Screen 
-          name="Signup" 
+          name="SignupScreen" 
           component={SignupScreen} 
           options={{ headerShown: false }} // hides default header
         />
+            <Stack.Screen name="WelcomeScreen" component={WelcomeScreen}  options={{ headerShown: false }}  />
          <Stack.Screen name="GenderSelectionScreen" component={GenderSelectionScreen}  options={{ headerShown: false }} />
             <Stack.Screen name="AgeSelectionScreen" component={AgeSelectionScreen}  options={{ headerShown: false }} />
             <Stack.Screen name="Relation" component={Relation}  options={{ headerShown: false }} />
@@ -32,6 +34,8 @@ export default function App() {
             <Stack.Screen name="SigninScreen" component={SigninScreen}  options={{ headerShown: false }}  />
             <Stack.Screen name="ExploreScreen" component={ExploreScreen}  options={{ headerShown: false }}  />
             
+
+
       </Stack.Navigator>
     </NavigationContainer>
   );
