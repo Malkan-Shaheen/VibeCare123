@@ -11,6 +11,8 @@ import LivingSituationPage from './screens/LivingSituationPage';
 import SigninScreen from './screens/SigninScreen';
 import ExploreScreen from './screens/ExploreScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
+import AdminSignIn from './screens/admin';
+import admindashboard from './screens/admindashboard';
 
 
 
@@ -33,7 +35,9 @@ export default function App() {
             <Stack.Screen name="LivingSituationPage" component={LivingSituationPage}  options={{ headerShown: false }}  />
             <Stack.Screen name="SigninScreen" component={SigninScreen}  options={{ headerShown: false }}  />
             <Stack.Screen name="ExploreScreen" component={ExploreScreen}  options={{ headerShown: false }}  />
-            
+             <Stack.Screen name="AdminSignIn" component={AdminSignIn} options={{ headerShown: false }}/>
+             <Stack.Screen name='admindashboard' component={admindashboard} options={{ headerShown: false }}/>
+
 
 
       </Stack.Navigator>
