@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, KeyboardAvoidingView, Platform } from 'react-native';
-import { Card } from 'react-native-paper';
-import Slider from '@react-native-community/slider';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { Card, ProgressBar } from 'react-native-paper';
 import { Video } from 'expo-av';
 
 const StressPredictor = ({ navigation }) => {
@@ -25,29 +24,26 @@ const StressPredictor = ({ navigation }) => {
 
       <View style={styles.centerContainer}>
         <Card style={styles.card}>
+          <Text style={styles.title}>Stress Check</Text>
           <Text style={styles.question}>
             On a scale of 0–21, how often have you felt nervous or “on edge” recently?
           </Text>
 
-          <View style={styles.sliderContainer}>
-            <Text style={styles.sliderValue}>10</Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={21}
-              step={1}
-              value={10}
-              minimumTrackTintColor="#6200ee"
-              maximumTrackTintColor="#000000"
-              thumbTintColor="#6200ee"
-            />
-            <View style={styles.sliderLabels}>
-              <Text style={styles.sliderLabel}>0</Text>
-              <Text style={styles.sliderLabel}>21</Text>
+          {/* ProgressBar instead of Slider */}
+          <View style={styles.progressContainer}>
+            <ProgressBar progress={0.5} color="#6200ee" style={styles.progressBar} />
+            <View style={styles.progressLabels}>
+              <Text style={styles.progressLabel}>0</Text>
+              <Text style={styles.progressLabel}>21</Text>
             </View>
+            <Text style={styles.value}>10</Text>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('WellBeingPage')}>
+          {/* Next Button */}
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => navigation.navigate('WellBeingPage')}
+          >
             <Text style={styles.buttonText}>Next</Text>
           </TouchableOpacity>
         </Card>
@@ -66,61 +62,75 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
   card: {
-    padding: 20,
+    padding: 25,
     width: '100%',
-    maxWidth: 400,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    elevation: 3,
+    maxWidth: 420,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    elevation: 5,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 15,
+    color: '#333',
   },
   question: {
     fontSize: 18,
-    marginBottom: 20,
-    fontWeight: 'bold',
+    marginBottom: 25,
+    fontWeight: '600',
     textAlign: 'center',
+    color: '#444',
   },
-  sliderContainer: {
-    width: '100%',
+  progressContainer: {
     marginBottom: 30,
   },
-  slider: {
-    width: '100%',
-    height: 40,
+  progressBar: {
+    height: 10,
+    borderRadius: 5,
   },
-  sliderValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-    color: '#6200ee',
-  },
-  sliderLabels: {
+  progressLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 5,
   },
-  sliderLabel: {
+  progressLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#555',
+  },
+  value: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#6200ee',
+    textAlign: 'center',
+    marginTop: 10,
   },
   backgroundVideo: {
     ...StyleSheet.absoluteFillObject,
     zIndex: -1,
   },
   button: {
+    marginTop: 10,
     backgroundColor: 'purple',
-    padding: 15,
-    borderRadius: 5,
+    paddingVertical: 15,
+    borderRadius: 30,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
   },
   buttonText: {
     color: '#fff',
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,
+    letterSpacing: 1,
   },
 });
 
