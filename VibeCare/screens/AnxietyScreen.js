@@ -42,12 +42,8 @@ const AnxietyScreen = ({ navigation, route }) => {
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex((prev) => prev + 1);
     } else {
-      // Navigate back to WellBeingPage with collected answers
-      navigation.navigate('WellBeingPage', {
-        userId,
-        depressionScore,
-        anxietyAnswers: answers,
-      });
+      // Navigate back when finished
+      navigation.navigate('WellBeingPage', { userId, depressionScore });
     }
   };
 
@@ -55,7 +51,7 @@ const AnxietyScreen = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      {/* Background video */}
+      {/* Background Video */}
       <Video
         ref={videoRef}
         source={require('../assets/images/bg1.mp4')}
@@ -66,9 +62,8 @@ const AnxietyScreen = ({ navigation, route }) => {
         isMuted
       />
 
-      {/* Question card */}
+      {/* Question Card */}
       <View style={styles.card}>
-        <Text style={styles.title}>Anxiety Assessment</Text>
         <Text style={styles.statement}>{statement}</Text>
 
         <View style={styles.optionsContainer}>
@@ -82,10 +77,6 @@ const AnxietyScreen = ({ navigation, route }) => {
             </TouchableOpacity>
           ))}
         </View>
-
-        <Text style={styles.progress}>
-          {currentIndex + 1} / {questions.length}
-        </Text>
       </View>
     </View>
   );
@@ -95,39 +86,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 16,
+    padding: 20,
   },
   card: {
-    padding: 24,
+    padding: 20,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    elevation: 6,
+    backgroundColor: 'rgba(255,255,255,0.9)', // semi-transparent over video
+    elevation: 5,
     shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     alignItems: 'center',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 12,
-    color: '#800080',
-    textAlign: 'center',
-  },
   statement: {
-    fontSize: 17,
-    fontWeight: '500',
+    fontSize: 18,
+    fontWeight: '600',
     marginBottom: 20,
     textAlign: 'center',
     color: '#333',
   },
   optionsContainer: {
+    marginVertical: 10,
     width: '100%',
-    marginTop: 10,
   },
   optionButton: {
     backgroundColor: '#800080',
-    paddingVertical: 12,
+    padding: 12,
     borderRadius: 12,
     marginVertical: 8,
   },
@@ -135,13 +119,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     textAlign: 'center',
-    fontWeight: '600',
-  },
-  progress: {
-    marginTop: 16,
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#555',
   },
 });
 
