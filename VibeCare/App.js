@@ -17,6 +17,7 @@ import admindashboard from './screens/admindashboard';
 import WellBeingPage from './screens/WellBeingPage';
 import DepressionQuiz from './screens/DepressionQuiz';
 import AnxietyScreen from './screens/AnxietyScreen';
+import StressPredictor from './screens/StressPredicctor';
 
 
 const Stack = createNativeStackNavigator();
@@ -67,6 +68,7 @@ export default function App() {
        <Stack.Screen name="WellBeingPage" component={WellBeingPage}  options={{ headerShown: false }} />
        <Stack.Screen name="DepressionQuiz" component={DepressionQuiz} options={{ headerShown: false }}/>
         <Stack.Screen name='AnxietyScreen' component={AnxietyScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="StressPredictor" component={StressPredictor} options={{ headerShown: false }} />
 
 
       </Stack.Navigator>
