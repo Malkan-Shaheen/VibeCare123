@@ -1,115 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import axios from "axios";
-import { API_BASE_URL } from "../config/api";
 
-const Recommendations = ({ route }) => {
-  const { userId } = route.params;
-  const [formData, setFormData] = useState(null);
-  const [loadingData, setLoadingData] = useState(true);
-  const [suggestion, setSuggestion] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoadingData(true);
-        const response = await axios.get(
-          `${API_BASE_URL}/get-user-preferences?userId=${userId}`
-        );
-
-        if (response.data?.status === "success") {
-          setFormData(response.data.preferences);
-        } else {
-          setFormData(null);
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setFormData(null);
-      } finally {
-        setLoadingData(false);
-      }
-    };
-
-    if (userId) fetchData();
-  }, [userId]);
-
-  const handleSubmit = async () => {
-    try {
-      setLoading(true);
-      // Call your backend AI logic here
-      const result = await axios.post(`${API_BASE_URL}/predict_suggestion`, {
-        userId,
-      });
-      setSuggestion(result.data.recommendation || "No recommendation available");
-    } catch (err) {
-      console.error("Prediction error:", err);
-      setSuggestion("Could not fetch recommendation at this time.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loadingData) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#6a51ae" />
-        <Text style={styles.loadingText}>Loading your data...</Text>
-      </View>
-    );
-  }
-
-  if (!formData) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>
-          No user data found. Please complete your profile first.
-        </Text>
-      </View>
-    );
-  }
-
+const Recommendations = () => {
   return (
     <View style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.header}>Your Profile</Text>
 
         <View style={styles.card}>
-          <Text style={styles.label}>Age Group: {formData.ageGroup}</Text>
-          <Text style={styles.label}>Gender: {formData.gender}</Text>
-          <Text style={styles.label}>
-            Relationship: {formData.relationshipStatus}
-          </Text>
-          <Text style={styles.label}>
-            Living Situation: {formData.livingSituation}
-          </Text>
+          <Text style={styles.label}>Age Group: 20-30</Text>
+          <Text style={styles.label}>Gender: Female</Text>
+          <Text style={styles.label}>Relationship: Single</Text>
+          <Text style={styles.label}>Living Situation: With Family</Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Get Personalized Plan</Text>
-          )}
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Get Personalized Plan</Text>
         </TouchableOpacity>
 
-        {suggestion ? (
-          <View style={styles.card}>
-            <Text style={styles.header}>Your Recommendation</Text>
-            <Text style={styles.suggestion}>{suggestion}</Text>
-          </View>
-        ) : null}
+        <View style={styles.card}>
+          <Text style={styles.header}>Your Recommendation</Text>
+          <Text style={styles.suggestion}>
+            This is a dummy recommendation. In the real app, your personalized
+            plan will appear here.
+          </Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -122,19 +43,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 20,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 10,
-    color: "#6a51ae",
-  },
-  errorText: {
-    color: "red",
-    textAlign: "center",
   },
   header: {
     fontSize: 18,

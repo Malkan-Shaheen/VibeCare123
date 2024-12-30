@@ -19,6 +19,7 @@ import DepressionQuiz from './screens/DepressionQuiz';
 import AnxietyScreen from './screens/AnxietyScreen';
 import StressPredictor from './screens/StressPredicctor';
 import Recommendations from './screens/recommendation';
+import PersonalExplorer from './screens/PersonalExplorer';
 
 
 const Stack = createNativeStackNavigator();
@@ -71,6 +72,7 @@ export default function App() {
         <Stack.Screen name='AnxietyScreen' component={AnxietyScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="StressPredictor" component={StressPredictor} options={{ headerShown: false }} />
         <Stack.Screen name='Recommendations' component={Recommendations}  options={{ headerShown: false }} />
+        <Stack.Screen name="PersonalExplorer" component={PersonalExplorer}  options={{ headerShown: false }} />
 
 
       </Stack.Navigator>
