@@ -21,7 +21,7 @@ import StressPredictor from './screens/StressPredicctor';
 import Recommendations from './screens/recommendation';
 import PersonalExplorer from './screens/PersonalExplorer';
 import CatchesYourEye from './screens/CatchesYourEye';
-
+import EmojiExplorer from './screens/EmojiExplorer';
 
 
 const Stack = createNativeStackNavigator();
@@ -76,7 +76,7 @@ export default function App() {
         <Stack.Screen name='Recommendations' component={Recommendations}  options={{ headerShown: false }} />
         <Stack.Screen name="PersonalExplorer" component={PersonalExplorer}  options={{ headerShown: false }} />
         <Stack.Screen name="CatchesYourEye" component={CatchesYourEye}  options={{ headerShown: false }}/>
-
+ <Stack.Screen name="EmojiExplorer" component={EmojiExplorer}  options={{ headerShown: false }}/>
 
       </Stack.Navigator>
     </NavigationContainer>
