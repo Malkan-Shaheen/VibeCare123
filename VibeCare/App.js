@@ -22,6 +22,7 @@ import Recommendations from './screens/recommendation';
 import PersonalExplorer from './screens/PersonalExplorer';
 import CatchesYourEye from './screens/CatchesYourEye';
 import EmojiExplorer from './screens/EmojiExplorer';
+import Dairy from './screens/Dairy';
 
 
 const Stack = createNativeStackNavigator();
@@ -78,6 +79,7 @@ export default function App() {
         <Stack.Screen name="CatchesYourEye" component={CatchesYourEye}  options={{ headerShown: false }}/>
  <Stack.Screen name="EmojiExplorer" component={EmojiExplorer}  options={{ headerShown: false }}/>
 
+ <Stack.Screen name="Dairy" component={Dairy} options={{headerShownfalse}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
