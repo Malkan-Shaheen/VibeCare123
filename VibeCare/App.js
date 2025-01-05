@@ -80,7 +80,7 @@ export default function App() {
         <Stack.Screen name="CatchesYourEye" component={CatchesYourEye}  options={{ headerShown: false }}/>
  <Stack.Screen name="EmojiExplorer" component={EmojiExplorer}  options={{ headerShown: false }}/>
 <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} options={{ headerShown: false }} />
- <Stack.Screen name="Dairy" component={Dairy} options={{headerShownfalse}}/>
+ <Stack.Screen name="Dairy" component={Dairy} options={{headerShown: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
