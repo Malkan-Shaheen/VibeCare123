@@ -24,6 +24,8 @@ import CatchesYourEye from './screens/CatchesYourEye';
 import EmojiExplorer from './screens/EmojiExplorer';
 import Dairy from './screens/Dairy';
 import FeedbackScreen from './screens/FeedbackScreen';
+import SuccessStoriesScreen from './screens/SuccessStoriesScreeny';
+import AdminSuccessStoriesScreen from './screens/AdminSuccessStoriesScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -81,6 +83,8 @@ export default function App() {
  <Stack.Screen name="EmojiExplorer" component={EmojiExplorer}  options={{ headerShown: false }}/>
 <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} options={{ headerShown: false }} />
  <Stack.Screen name="Dairy" component={Dairy} options={{headerShown: false}}/>
+ <Stack.Screen name="SuccessStoriesScreen" component={SuccessStoriesScreen} options={{headerShown: false}}/>
+ <Stack.Screen name="AdminSuccessStories" component={AdminSuccessStoriesScreen} options={{headerShown: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
