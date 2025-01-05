@@ -24,7 +24,7 @@ import CatchesYourEye from './screens/CatchesYourEye';
 import EmojiExplorer from './screens/EmojiExplorer';
 import Dairy from './screens/Dairy';
 import FeedbackScreen from './screens/FeedbackScreen';
-import SuccessStoriesScreen from './screens/SuccessStoriesScreeny';
+import SuccessStoriesScreen from './screens/SuccessStoriesScreen';
 import AdminSuccessStoriesScreen from './screens/AdminSuccessStoriesScreen';
 
 
@@ -84,7 +84,7 @@ export default function App() {
 <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} options={{ headerShown: false }} />
  <Stack.Screen name="Dairy" component={Dairy} options={{headerShown: false}}/>
  <Stack.Screen name="SuccessStoriesScreen" component={SuccessStoriesScreen} options={{headerShown: false}}/>
- <Stack.Screen name="AdminSuccessStories" component={AdminSuccessStoriesScreen} options={{headerShown: false}}/>
+ <Stack.Screen name="AdminSuccessStoriesScreen" component={AdminSuccessStoriesScreen} options={{headerShown: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

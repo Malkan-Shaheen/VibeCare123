@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
 
 const AdminDashboard = () => {
+   const navigation = useNavigation();
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Admin Dashboard</Text>
@@ -23,19 +25,31 @@ const AdminDashboard = () => {
       </Text>
 
       {/* Static buttons just for display */}
-      <TouchableOpacity style={[styles.button, styles.usersButton]}>
+       <TouchableOpacity
+        style={[styles.button, styles.usersButton]}
+        onPress={() => navigation.navigate("AdminUserProfileManagementScreen")}
+      >
         <Text style={styles.buttonText}>Users Profile Management</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.button, styles.storiesButton]}>
+      <TouchableOpacity
+        style={[styles.button, styles.storiesButton]}
+        onPress={() => navigation.navigate("AdminSuccessStoriesScreen")}
+      >
         <Text style={styles.buttonText}>Success Stories Management</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.button, styles.feedbackButton]}>
+      <TouchableOpacity
+        style={[styles.button, styles.feedbackButton]}
+        onPress={() => navigation.navigate("FeedbackListScreen")}
+      >
         <Text style={styles.buttonText}>Feedback Management</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.button, styles.vcButton]}>
+      <TouchableOpacity
+        style={[styles.button, styles.vcButton]}
+        onPress={() => navigation.navigate("VCHistoryScreen")}
+      >
         <Text style={styles.buttonText}>Virtual Counselling History</Text>
       </TouchableOpacity>
     </ScrollView>
