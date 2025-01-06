@@ -31,6 +31,7 @@ import EditProfileScreen from './screens/EditProfile';
 import PrivacyScreen from './screens/PrivacyScreen';
 import AdminUserProfileManagementScreen from './screens/AdminUserProfileManagementScreen';
 import FeedbackListScreen from './screens/Feedbacklistscreen';
+import VCHistoryScreen from './screens/VCHistoryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -94,6 +95,7 @@ export default function App() {
      <Stack.Screen name="PrivacyScreen" component={PrivacyScreen} options={{headerShown: false}}/>
          <Stack.Screen name="AdminUserProfileManagementScreen" component={AdminUserProfileManagementScreen}options={{headerShown: false}} />
          <Stack.Screen name="Feedbacklistscreen" component={FeedbackListScreen}options={{headerShown: false}} />
+         <Stack.Screen name="VCHistoryScreen" component={VCHistoryScreen} options={{headerShown: false}}/>
 
 
      
