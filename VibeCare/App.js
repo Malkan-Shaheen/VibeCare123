@@ -26,7 +26,9 @@ import Dairy from './screens/Dairy';
 import FeedbackScreen from './screens/FeedbackScreen';
 import SuccessStoriesScreen from './screens/SuccessStoriesScreen';
 import AdminSuccessStoriesScreen from './screens/AdminSuccessStoriesScreen';
-
+import ChatBotScreen from './screens/ChatbotScreen';
+import EditProfileScreen from './screens/EditProfile';
+import PrivacyScreen from './screens/PrivacyScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -80,11 +82,16 @@ export default function App() {
         <Stack.Screen name='Recommendations' component={Recommendations}  options={{ headerShown: false }} />
         <Stack.Screen name="PersonalExplorer" component={PersonalExplorer}  options={{ headerShown: false }} />
         <Stack.Screen name="CatchesYourEye" component={CatchesYourEye}  options={{ headerShown: false }}/>
- <Stack.Screen name="EmojiExplorer" component={EmojiExplorer}  options={{ headerShown: false }}/>
-<Stack.Screen name="FeedbackScreen" component={FeedbackScreen} options={{ headerShown: false }} />
- <Stack.Screen name="Dairy" component={Dairy} options={{headerShown: false}}/>
- <Stack.Screen name="SuccessStoriesScreen" component={SuccessStoriesScreen} options={{headerShown: false}}/>
- <Stack.Screen name="AdminSuccessStoriesScreen" component={AdminSuccessStoriesScreen} options={{headerShown: false}}/>
+         <Stack.Screen name="EmojiExplorer" component={EmojiExplorer}  options={{ headerShown: false }}/>
+        <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Dairy" component={Dairy} options={{headerShown: false}}/>
+        <Stack.Screen name="SuccessStoriesScreen" component={SuccessStoriesScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="AdminSuccessStoriesScreen" component={AdminSuccessStoriesScreen} options={{headerShown: false}}/>
+       <Stack.Screen name="ChatBotScreen" component={ChatBotScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} options={{headerShown: false}}/>
+     <Stack.Screen name="PrivacyScreen" component={PrivacyScreen} options={{headerShown: false}}/>
+     
+     
       </Stack.Navigator>
     </NavigationContainer>
   );
