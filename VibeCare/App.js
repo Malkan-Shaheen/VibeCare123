@@ -30,6 +30,7 @@ import ChatBotScreen from './screens/ChatbotScreen';
 import EditProfileScreen from './screens/EditProfile';
 import PrivacyScreen from './screens/PrivacyScreen';
 import AdminUserProfileManagementScreen from './screens/AdminUserProfileManagementScreen';
+import FeedbackListScreen from './screens/Feedbacklistscreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -91,7 +92,9 @@ export default function App() {
        <Stack.Screen name="ChatBotScreen" component={ChatBotScreen} options={{headerShown: false}}/>
         <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} options={{headerShown: false}}/>
      <Stack.Screen name="PrivacyScreen" component={PrivacyScreen} options={{headerShown: false}}/>
-         <Stack.Screen name="AdminUserProfileManagementScreen" component={AdminUserProfileManagementScreen} />
+         <Stack.Screen name="AdminUserProfileManagementScreen" component={AdminUserProfileManagementScreen}options={{headerShown: false}} />
+         <Stack.Screen name="Feedbacklistscreen" component={FeedbackListScreen}options={{headerShown: false}} />
+
 
      
      
