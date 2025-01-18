@@ -7,28 +7,48 @@ import {
   Image,
   Modal,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useUserPreferences } from '../UserPreferencesContext';
+import { API_BASE_URL } from '../config/api';
 
-const LivingSituationPage = () => {
+const LivingSituationPage = ({ navigation, route }) => {
+  const { preferences } = useUserPreferences();
+  const { userId } = route.params || {};  
+
   const [showDialog, setShowDialog] = useState(false);
-  const navigation = useNavigation();
 
+  // ✅ Function to close the dialog
   const closeDialog = () => {
-    console.log("Dialog closed");
     setShowDialog(false);
-    navigation.replace("SigninScreen"); // 👈 navigate to Signin
+    navigation.replace("SigninScreen", { userId });
   };
 
-  const handleLivingSituationSelect = (livingSituation) => {
-    console.log("Selected living situation:", livingSituation);
-    setShowDialog(true);
+  const handleLivingSituationSelect = async (livingSituation) => {
+    const fullPreferences = { ...preferences, livingSituation, userId };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/save-preferences`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fullPreferences),
+      });
+
+      const data = await response.json();
+      if (data.status === "success") {
+        console.log("Preferences saved successfully!");
+        setShowDialog(true); 
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+    console.log("Saving preferences for userId:", userId);
+
   };
 
   return (
     <View style={styles.container}>
       {/* App Bar */}
       <View style={styles.appBar}>
-        <TouchableOpacity onPress={() => console.log("Back pressed")}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
       </View>
@@ -71,12 +91,14 @@ const LivingSituationPage = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.dialogTitle}>Registration Successful 🎉</Text>
+            <Text style={styles.dialogTitle}>Preferences Added Successfully.</Text>
             <Text style={styles.dialogQuote}>
               “Your journey to heal begins today. It's okay not to be okay.”
             </Text>
             <View style={styles.dialogDivider} />
-            <Text style={styles.dialogMessage}>Let's begin ...</Text>
+            <Text style={styles.dialogMessage}>
+              Let's begin ...
+            </Text>
             <TouchableOpacity style={styles.okButton} onPress={closeDialog}>
               <Text style={styles.okButtonText}>OK</Text>
             </TouchableOpacity>

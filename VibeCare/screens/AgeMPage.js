@@ -1,19 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
+import { useUserPreferences } from '../UserPreferencesContext';
 
-const AgeSelectionScreen = ({ navigation, route }) => {
-  const { userId, Email } = route?.params || {}; // keep params if needed later
-
+const AgeSelectionScreen = ({ navigation ,route}) => {
   const ageOptions = [
     { label: '18–25', image: require('../assets/images/M1.png'), backgroundColor: '#E4F3F6' },
     { label: '25–40', image: require('../assets/images/M2.png'), backgroundColor: '#FBD9D9' },
     { label: '40+', image: require('../assets/images/M3.png'), backgroundColor: '#E7DFF6' },
   ];
 
+  const { setPreferences } = useUserPreferences();
+  const { userId, Email } = route?.params || {};
+
   const handleAgeSelect = (ageGroup) => {
-    console.log(`Selected Age Group: ${ageGroup}`); // dummy log
-    // ✅ Navigate to relation page instead of saving
-    navigation.navigate("Relation");
+    setPreferences(prev => ({ ...prev, ageGroup }));
+    navigation.navigate("Relation",{userId,Email});
+    console.log(userId,Email);
   };
 
   const renderAgeOption = ({ item }) => (

@@ -11,6 +11,10 @@ import {
 } from "react-native";
 import { Checkbox } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {API_BASE_URL} from '../config/api';
+// import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 function SignupScreen({ navigation }) {
   const [isChecked, setIsChecked] = useState(false);
@@ -76,10 +80,8 @@ function SignupScreen({ navigation }) {
       );
     }
   };
-  const closeAlert = () => {
-    setCustomAlertVisible(false);
-  };
-  
+  const userId = `${Username}_${Date.now()}`;
+
   const handleSignup = async () => {
     if (!isChecked) {
       showAlert("Alert", "You must agree to the terms and conditions to proceed.");
@@ -101,17 +103,41 @@ function SignupScreen({ navigation }) {
     }
   
     try {
-      // Instead of OTP, go directly to Gender Selection
-      navigation.navigate("GenderSelectionScreen", {
-        Name,
-        Username,
-        Email,
-        Password,
-      });
+
+       const otpResponse = await fetch(`${API_BASE_URL}/send-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, Email }),
+          
+        });
+        const data = await otpResponse.json();
+  
+      if (data.status === 'success') {
+        navigation.navigate("EmailVerificationSignUp", {
+          Name,
+          Username,
+          Email,
+          Password,
+        });
+      } else {
+        showAlert("Error", data.message || "Failed to send OTP."  );
+      }
     } catch (error) {
-      console.error("Error during signup:", error);
-      showAlert("Error", "Something went wrong. Please try again.");
+      console.error('Error sending OTP:', error);
+      showAlert("Error", "An error occurred while sending the OTP. Please try again.");
     }
+  };
+  
+  
+
+  const showAlert = (title, message) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setCustomAlertVisible(true);
+  };
+
+  const closeAlert = () => {
+    setCustomAlertVisible(false);
   };
   
 
@@ -225,6 +251,7 @@ function SignupScreen({ navigation }) {
                 color="#8b3efa"
               />
             </TouchableOpacity>
+            
           </View>
           {PasswordError && <Text style={styles.errorText}>{PasswordError}</Text>}
         </View>
@@ -238,17 +265,18 @@ function SignupScreen({ navigation }) {
           color="#8b3efa"
         />
         <Text style={styles.checkboxText}>
-          By signing up, you agree to our Terms of Service and Privacy Policy.{" "}
-          <TouchableOpacity onPress={() => navigation.navigate("PrivacyScreen")}>
-            <Text style={styles.link}>View Privacy Policies</Text>
-          </TouchableOpacity>
-        </Text>
+  By signing up, you agree to our Terms of Service and Privacy Policy.{' '}
+  <TouchableOpacity onPress={() => navigation.navigate('PrivacyScreen')}>
+    <Text style={styles.link}>View Privacy Policies</Text>
+  </TouchableOpacity>
+</Text>
+
       </View>
 
       <Pressable
         onPress={() => setIsInteracted(true)}
-        onHoverIn={() => Platform.OS === "web" && setIsHovered(true)}
-        onHoverOut={() => Platform.OS === "web" && setIsHovered(false)}
+        onHoverIn={() => Platform.OS === 'web' && setIsHovered(true)}
+        onHoverOut={() => Platform.OS === 'web' && setIsHovered(false)}
         onPressIn={() => setIsPressed(true)}
         onPressOut={() => setIsPressed(false)}
         style={({ pressed }) => [
@@ -269,9 +297,11 @@ function SignupScreen({ navigation }) {
         disabled={!(isHovered || isInteracted)}
       >
         <Text style={styles.signupButtonText}>
-          {isHovered || isInteracted ? "Sign Up" : "Tap or Hover to activate"}
+          {(isHovered || isInteracted) ? "Sign Up" : "Tap or Hover to activate"}
         </Text>
       </TouchableOpacity>
+
+      
 
       <TouchableOpacity
         style={{ marginTop: 20, alignItems: "center" }}
@@ -284,6 +314,8 @@ function SignupScreen({ navigation }) {
           </Text>
         </Text>
       </TouchableOpacity>
+      
+  
 
       {/* Custom Alert */}
       <Modal
@@ -481,6 +513,8 @@ const styles = StyleSheet.create({
   },
 
 });
+
+
 
 
 export default SignupScreen;

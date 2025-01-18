@@ -1,15 +1,24 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-const GenderSelectionScreen = ({ navigation }) => {
-  const handleGenderSelect = (gender) => {
-    // Just navigate forward without saving anything
-    navigation.navigate("AgeSelectionScreen");
-    console.log("Selected Gender:", gender);
-  };
+import { useUserPreferences } from '../UserPreferencesContext';
+
+
+const GenderSelectionScreen = ({ navigation, route }) => {
+    const { setPreferences } = useUserPreferences();
+    const { userId, Email } = route?.params || {};
+
+    const handleGenderSelect = (gender) => {
+        setPreferences(prev => ({ ...prev, gender }));
+        navigation.navigate("AgeSelectionScreen",{userId,Email});
+        console.log(userId,Email);
+    };
 
   return (
     <View style={styles.container}>
+      
+
       {/* App Title */}
       <Text style={styles.title}>VibeCare</Text>
 
@@ -26,24 +35,18 @@ const GenderSelectionScreen = ({ navigation }) => {
         {/* Male Option */}
         <TouchableOpacity
           style={styles.genderOption}
-          onPress={() => handleGenderSelect("Male")}
-        >
-          <Image
-            source={require('../assets/images/male.png')}
-            style={styles.genderImage}
-          />
+          onPress={() => handleGenderSelect("Male")} >
+
+          <Image source={require('../assets/images/male.png')} style={styles.genderImage} />
           <Text style={styles.genderText}>Male</Text>
         </TouchableOpacity>
 
         {/* Female Option */}
         <TouchableOpacity
           style={styles.genderOption}
-          onPress={() => handleGenderSelect("Female")}
+           onPress={() => handleGenderSelect("FeMale")} // Replace with actual screen name
         >
-          <Image
-            source={require('../assets/images/female.png')}
-            style={styles.genderImage}
-          />
+          <Image source={require('../assets/images/female.png')} style={styles.genderImage} />
           <Text style={styles.genderText}>Female</Text>
         </TouchableOpacity>
       </View>
@@ -58,6 +61,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: 'center',
   },
+  
+
   title: {
     fontSize: 48,
     color: '#5c1060',
