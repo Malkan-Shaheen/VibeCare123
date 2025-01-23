@@ -490,6 +490,40 @@ app.get("/user-profile", async (req, res) => {
       res.status(500).send({ status: "error", message: "Internal server error" });
     }
   });
+  const Image = require('./models/Images'); // Ensure correct path if placed elsewhere
+
+// API to get 5 random images
+app.get('/random-images', async (req, res) => {
+  try {
+    const randomImages = await Image.aggregate([
+      { $sample: { size: 5 } } // Pick 5 random documents
+    ]);
+    
+    // Remove the duplicate response and use the correct variable name
+    res.status(200).json({ 
+      status: 'success', 
+      data: randomImages 
+    });
+  } catch (error) {
+    console.error("Error fetching random images:", error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Internal server error' 
+    });
+  }
+});
+
+app.get('/image-details/:id', async (req, res) => {
+  try {
+    const image = await Image.findById(req.params.id);
+    if (!image) {
+      return res.status(404).json({ success: false, message: "Image not found" });
+    }
+    res.json({ success: true, data: image });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
   
 
 
