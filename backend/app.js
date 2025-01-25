@@ -524,7 +524,40 @@ app.get('/image-details/:id', async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-  
+const emojiRoutes = require('./routes/emojis');
+app.use(emojiRoutes);
+
+app.get('/searchEmoji', async (req, res) => {
+  try {
+    const inputEmoji = req.query.q?.trim();
+    if (!inputEmoji) {
+      return res.status(400).json({ error: 'Emoji is required as query' });
+    }
+
+    const data = await EmojiData.findOne(); // Assuming the full emoji object is in one document
+
+    if (!data) return res.status(404).json({ error: 'Emoji data not found' });
+
+    for (const categoryObj of data.categories) {
+      for (const subcat of categoryObj.subcategories) {
+        for (const emoji of subcat.emojis) {
+          if (emoji.emoji === inputEmoji) {
+            return res.json({
+              category: categoryObj.category,
+              subcategory: subcat.subcategory,
+              emojiData: emoji,
+            });
+          }
+        }
+      }
+    }
+
+    res.status(404).json({ error: 'Emoji not found' });
+  } catch (err) {
+    console.error('Emoji search failed:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 // Start Server
