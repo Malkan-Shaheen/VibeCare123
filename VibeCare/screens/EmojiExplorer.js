@@ -6,8 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
+  Dimensions,
   Animated,
 } from 'react-native';
+import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
+
+const EMOJI_API = `${API_BASE_URL}/api/emojis`;
+const { width } = Dimensions.get('window');
 
 const COLOR_PALETTE = ['#FFD6E8', '#D6F5FF', '#D9FFD9', '#FFF4D6', '#E6D6FF', '#FFE6D6'];
 
@@ -39,15 +45,17 @@ const LoadingDots = () => {
       {dots.map((i) => {
         const opacity = dotAnimation.interpolate({
           inputRange: [0, 0.33, 0.66, 1],
-          outputRange:
-            i === 0
-              ? [1, 0.3, 0.3, 1]
-              : i === 1
-              ? [0.3, 1, 0.3, 0.3]
-              : [0.3, 0.3, 1, 0.3],
+          outputRange: i === 0 ? [1, 0.3, 0.3, 1] : 
+                       i === 1 ? [0.3, 1, 0.3, 0.3] : 
+                       [0.3, 0.3, 1, 0.3],
         });
-
-        return <Animated.View key={i} style={[styles.dot, { opacity }]} />;
+        
+        return (
+          <Animated.View 
+            key={i}
+            style={[styles.dot, { opacity }]}
+          />
+        );
       })}
     </View>
   );
@@ -57,28 +65,22 @@ const EmojiExplorer = ({ navigation }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Dummy data
-  const DUMMY_CATEGORIES = [
-    { category: 'Smileys 😀' },
-    { category: 'Animals 🐶' },
-    { category: 'Food 🍕' },
-    { category: 'Travel ✈️' },
-    { category: 'Sports ⚽' },
-    { category: 'Music 🎵' },
-    { category: 'Flags 🚩' },
-    { category: 'Weather 🌦️' },
-    { category: 'Objects 📱' },
-    { category: 'People 🧑' },
-    { category: 'Nature 🌳' },
-    { category: 'Symbols ♻️' },
-  ];
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(EMOJI_API);
+      if (res.data && res.data.length > 0) {
+        const mainCategories = res.data.slice(0, 12);
+        setCategories(mainCategories);
+      }
+    } catch (err) {
+      console.error('Error loading categories:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // simulate loading delay
-    setTimeout(() => {
-      setCategories(DUMMY_CATEGORIES);
-      setLoading(false);
-    }, 1500);
+    fetchCategories();
   }, []);
 
   if (loading) {
@@ -102,6 +104,7 @@ const EmojiExplorer = ({ navigation }) => {
     const borderColor = darkenHexColor(bgColor, 30);
     return (
       <TouchableOpacity
+        key={index}
         style={[
           styles.categoryCard,
           {
@@ -125,9 +128,7 @@ const EmojiExplorer = ({ navigation }) => {
     >
       <View style={styles.overlay}>
         <Text style={styles.title}>📚 Emoji Encyclopedia</Text>
-        <Text style={styles.quote}>
-          "Emotions are the colors of the soul — let's explore them one emoji at a time."
-        </Text>
+        <Text style={styles.quote}>"Emotions are the colors of the soul — let's explore them one emoji at a time."</Text>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -158,7 +159,11 @@ const EmojiExplorer = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  background: { flex: 1, width: '100%', height: '100%' },
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.85)',
@@ -202,7 +207,9 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 20,
   },
-  list: { paddingBottom: 32 },
+  list: {
+    paddingBottom: 32,
+  },
   categoryCard: {
     flex: 1,
     padding: 20,
@@ -216,8 +223,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 2 },
     shadowRadius: 6,
   },
-  categoryText: { fontSize: 18, fontWeight: '600', color: '#333' },
-  buttonContainer: { marginBottom: 24 },
+  categoryText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  buttonContainer: {
+    marginBottom: 24,
+  },
   darkButton: {
     backgroundColor: '#2C2C2E',
     paddingVertical: 12,
@@ -232,14 +245,24 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
   },
-  buttonText: { color: '#FFF', fontSize: 17, fontWeight: '600' },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '600',
+  },
   dotsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 10,
   },
-  dot: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#FF6B6B', marginHorizontal: 6 },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#FF6B6B',
+    marginHorizontal: 6,
+  },
 });
 
 export default EmojiExplorer;
