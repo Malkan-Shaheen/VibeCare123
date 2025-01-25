@@ -617,6 +617,178 @@ const DiaryEntrySchema = new mongoose.Schema({
     }
   });
 
+  // Chat Schema
+const ChatSchema = new mongoose.Schema({
+    userId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "Userinfo", 
+        required: true 
+    },
+    messages: [{
+        text: { type: String, required: true },
+        sender: { 
+            type: String, 
+            required: true,
+            enum: ['user', 'bot'] // Only allows 'user' or 'bot'
+        },
+        timestamp: { 
+            type: Date, 
+            default: Date.now 
+        }
+    }]
+}, {
+    collection: "Chats",
+    timestamps: true // Adds createdAt and updatedAt automatically
+});
+
+const Chat = mongoose.model("Chat", ChatSchema);
+
+// API Endpoints
+app.post("/save-chat", async (req, res) => {
+    const { userId, messages } = req.body;
+
+    if (!userId || !messages) {
+        return res.status(400).send({ 
+            status: "error", 
+            message: "Missing required fields (userId or messages)" 
+        });
+    }
+
+    try {
+        // Validate each message in the array
+        for (const message of messages) {
+            if (!message.text || !message.sender) {
+                return res.status(400).send({ 
+                    status: "error", 
+                    message: "Each message must have text and sender" 
+                });
+            }
+        }
+
+        const newChat = new Chat({
+            userId,
+            messages
+        });
+
+        await newChat.save();
+        res.send({ 
+            status: "success", 
+            message: "Chat saved successfully",
+            chatId: newChat._id 
+        });
+    } catch (error) {
+        console.error("Error saving chat:", error);
+        res.status(500).send({ 
+            status: "error", 
+            message: "Internal server error" 
+        });
+    }
+});
+
+app.get("/get-chats", async (req, res) => {
+    const { userId } = req.query;
+
+    if (!userId) {
+        return res.status(400).send({ 
+            status: "error", 
+            message: "userId is required" 
+        });
+    }
+
+    try {
+        const chats = await Chat.find({ userId })
+            .sort({ createdAt: -1 }) // Most recent first
+            .limit(50); // Limit to 50 most recent chats
+
+        res.send({ 
+            status: "success", 
+            chats 
+        });
+    } catch (error) {
+        console.error("Error fetching chats:", error);
+        res.status(500).send({ 
+            status: "error", 
+            message: "Internal server error" 
+        });
+    }
+});
+// Add this to your backend routes
+app.delete("/delete-chats", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ 
+        status: "error", 
+        message: "Invalid user ID" 
+      });
+    }
+
+    const result = await Chat.deleteMany({ userId });
+    
+    res.json({ 
+      status: "success", 
+      message: "Chat history deleted",
+      deletedCount: result.deletedCount 
+    });
+  } catch (error) {
+    console.error('Error deleting chats:', error);
+    res.status(500).json({ 
+      status: "error", 
+      message: "Internal server error" 
+    });
+  }
+});
+
+app.get("/get-all-chats", async (req, res) => {
+  try {
+    const chats = await Chat.find()
+      .sort({ createdAt: -1 })
+      .limit(500);
+
+    res.send({
+      status: "success",
+      chats,
+    });
+  } catch (error) {
+    console.error("Error fetching all chats:", error);
+    res.status(500).send({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+// New API to get chats of a specific user
+app.get("/get-user-chats/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).send({
+        status: "error",
+        message: "userId is required",
+      });
+    }
+
+    const chats = await Chat.find({ userId })  // filter by userId
+      .sort({ createdAt: -1 })
+      .limit(500);
+
+    res.send({
+      status: "success",
+      chats,
+    });
+  } catch (error) {
+    console.error("Error fetching user chats:", error);
+    res.status(500).send({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+
 
 // Start Server
 const PORT = 3000;

@@ -9,15 +9,26 @@ import {
   FlatList,
   Keyboard,
   Modal,
+  Alert,
   ActivityIndicator,
   Dimensions
 } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRoute } from '@react-navigation/native'; 
+import {API_BASE_URL} from '../config/api';
+
+
+//Google API Key
+const GEMINI_API_KEY = 'AIzaSyDHrhraOvy-f5mOfEe0wiqSds37R_66WvI';
+const URL = `${API_BASE_URL}`; 
 
 const ChatBotScreen = () => {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [historyVisible, setHistoryVisible] = useState(false);
-  const [username, setUsername] = useState('Guest');
+  const flatListRef = useRef(null);
+  const [username, setUsername] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -26,9 +37,171 @@ const ChatBotScreen = () => {
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
-  const flatListRef = useRef(null);
+const showDeleteConfirmation = () => {
+  setShowDeleteAlert(true);
+};
 
-  // Dummy send message
+const handleDeleteConfirm = () => {
+  setShowDeleteAlert(false);
+  deleteChatHistory();
+};
+
+const handleDeleteCancel = () => {
+  setShowDeleteAlert(false);
+};
+
+  
+
+  // Fetch user data on component mount
+ const route = useRoute();
+const userId = route.params?.userId || null;
+ useEffect(() => {
+    if (userId) {
+      console.log("✅ User ID received successfully:", userId);
+    } else {
+      console.log("⚠️ No User ID received - user might be guest or error occurred");
+    }
+  }, [userId]);
+
+  // Fetch username only (since we get userId from route params)
+useEffect(() => {
+  const fetchUserData = async () => {
+    if (!userId) {
+      console.log("No userId available, skipping user data fetch");
+      return;
+    }
+
+    try {
+      console.log("🔍 Fetching user data for userId:", userId);
+      const response = await fetch(`${API_BASE_URL}/get-user/${userId}`);
+      
+      // First check if the response is OK (status 200-299)
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log("⚠️ Server responded with error:", errorData.message);
+        throw new Error(errorData.message || 'Failed to fetch user data');
+      }
+
+      // Parse the response data
+      const responseData = await response.json();
+      
+      // Check if we got successful response with user data
+      if (responseData.status === "success" && responseData.data) {
+        const userData = responseData.data; // Access the nested data object
+        console.log("✅ User data fetched successfully:", userData);
+        
+        // Set username from the response data
+        const usernameToSet = userData.Username || userData.Name || 'User';
+        setUsername(usernameToSet);
+        await AsyncStorage.setItem('username', usernameToSet);
+      } else {
+        console.log("⚠️ User data not found in response");
+        // Fallback to AsyncStorage if available
+        const storedUsername = await AsyncStorage.getItem('username');
+        if (storedUsername) {
+          console.log("Using username from AsyncStorage as fallback");
+          setUsername(storedUsername);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error fetching user data:', error.message);
+      // Fallback to AsyncStorage if available
+      const storedUsername = await AsyncStorage.getItem('username');
+      if (storedUsername) {
+        console.log("Using username from AsyncStorage after error");
+        setUsername(storedUsername);
+      } else {
+        // If all else fails, set a default username
+        setUsername('User');
+      }
+    }
+  };
+
+  fetchUserData();
+}, [userId]);
+
+
+  // Save chat to MongoDB
+  const saveChatToMongoDB = async (chatData) => {
+    if (!userId) {
+      console.log("Not saving chat - no userId available");
+      return null;
+    }
+
+    try {
+      console.log("💾 Attempting to save chat to MongoDB...");
+      const response = await fetch(`${API_BASE_URL}/save-chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          messages: chatData,
+          timestamp: new Date()
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log("✅ Chat saved successfully to MongoDB:", data);
+      } else {
+        console.log("⚠️ Chat save response not OK:", data);
+      }
+      return data;
+    } catch (error) {
+      console.error('❌ Error saving chat:', error);
+      return null;
+    }
+  };
+
+
+  // Fetch chat history from MongoDB
+ // Updated fetchChatHistory function
+const fetchChatHistory = async () => {
+  if (!userId) {
+    console.log("Not fetching history - no userId available");
+    return;
+  }
+
+  try {
+    setLoadingHistory(true);
+    console.log("📚 Fetching chat history for userId:", userId);
+    const response = await fetch(`${API_BASE_URL}/get-chats?userId=${userId}`);
+    
+    // First check if response is OK
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.log("⚠️ Server responded with error:", errorData.message);
+      throw new Error(errorData.message || 'Failed to fetch chat history');
+    }
+
+    const responseData = await response.json();
+    console.log("Full response data:", responseData);
+    
+    // Check if we got successful response with chat data
+    if (responseData.status === "success" && Array.isArray(responseData.chats)) {
+      console.log(`✅ Retrieved ${responseData.chats.length} chat sessions from history`);
+      
+      // Safely flatten messages from all chat sessions
+      const allMessages = responseData.chats.reduce((acc, chat) => {
+        return acc.concat(chat.messages || []);
+      }, []);
+      
+      console.log(`📝 Total messages in history: ${allMessages.length}`);
+      setChatHistory(allMessages);
+    } else {
+      console.log("⚠️ No chat data found or invalid format:", responseData);
+      setChatHistory([]); // Set empty array if no data
+    }
+  } catch (error) {
+    console.error('❌ Error fetching chat history:', error.message);
+    setChatHistory([]); // Set empty array on error
+  } finally {
+    setLoadingHistory(false);
+  }
+};
   const sendMessage = async () => {
     if (!userInput.trim()) return;
 
@@ -38,36 +211,55 @@ const ChatBotScreen = () => {
     setUserInput('');
     Keyboard.dismiss();
 
-    setLoading(true);
+    try {
+      setLoading(true);
+      const prompt = `
+        You are a licensed psychiatrist named Dodo. You help users deal with mental stress, anxiety, confusion, or daily life issues. Be empathetic, professional, and speak with kindness.
+        Now, answer the following as a psychiatrist:
+        "${userInput}"
+      `;
 
-    setTimeout(() => {
-      const botMessage = {
-        text: "This is a dummy response from Dodo 😊",
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botMessage]);
+      const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      const botText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from AI.';
+      const botMessage = { text: botText, sender: 'bot', timestamp: new Date() };
+
+      const newMessages = [...updatedMessages, botMessage];
+      const newChatData = [...updatedMessages, botMessage];
+
+      // Save to MongoDB
+      if (userId) {
+        await saveChatToMongoDB(newChatData);
+      }
+
+      setMessages(newMessages);
+      
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMsg = { text: 'Error: Try again later.', sender: 'bot', timestamp: new Date() };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  // Dummy chat history
+  // Load chat history when history modal is opened
   const handleOpenHistory = async () => {
-    setLoadingHistory(true);
-    setTimeout(() => {
-      setChatHistory([
-        { text: "Hi Dodo!", sender: "user", timestamp: new Date() },
-        { text: "Hello! How can I help you today?", sender: "bot", timestamp: new Date() }
-      ]);
-      setLoadingHistory(false);
-      setHistoryVisible(true);
-    }, 800);
+    if (userId) {
+      await fetchChatHistory();
+    }
+    setHistoryVisible(true);
   };
 
-  const deleteChatHistory = () => {
-    setChatHistory([]);
-    setShowDeleteAlert(false);
-    setShowSuccessAlert(true);
+  // Toggle between showing last 15 messages and full history
+  const toggleHistoryView = () => {
+    setShowFullHistory(!showFullHistory);
   };
 
   useEffect(() => {
@@ -75,13 +267,49 @@ const ChatBotScreen = () => {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   }, [messages]);
+  // Add this function to your component
+const deleteChatHistory = async () => {
+  if (!userId) {
+    console.log("No userId available, cannot delete history");
+    return;
+  }
+
+  try {
+    setLoadingHistory(true);
+    console.log("🗑️ Deleting chat history for userId:", userId);
+    const response = await fetch(`${API_BASE_URL}/delete-chats`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId })
+    });
+
+    if (response.ok) {
+      console.log("✅ Chat history deleted successfully");
+      setChatHistory([]); // Clear local chat history
+      setShowSuccessAlert(true); // Show custom success alert
+    } else {
+      const errorData = await response.json();
+      console.log("⚠️ Failed to delete chat history:", errorData.message);
+      Alert.alert("Error", errorData.message || "Failed to delete chat history");
+    }
+  } catch (error) {
+    console.error('❌ Error deleting chat history:', error);
+    Alert.alert("Error", "Failed to delete chat history");
+  } finally {
+    setLoadingHistory(false);
+  }
+};
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => setInfoVisible(true)}>
-          <Image source={require('../assets/images/logo.png')} style={styles.infoIcon} />
+          <Image 
+            source={require('../assets/images/logo.png')} 
+            style={styles.infoIcon} 
+          />
         </TouchableOpacity>
         <TouchableOpacity onPress={handleOpenHistory}>
           <Image source={require('../assets/images/history.png')} style={styles.historyIcon} />
@@ -90,17 +318,18 @@ const ChatBotScreen = () => {
 
       {messages.length < 5 && (
         <View style={styles.chatbotImageContainer}>
-          <Image source={require('../assets/images/dodo.png')} style={styles.chatbotImage} />
+          <Image 
+            source={require('../assets/images/dodo.png')} 
+            style={styles.chatbotImage} 
+          />
         </View>
       )}
 
-      {/* Welcome */}
       <View style={styles.welcomeContainer}>
-        <Text style={styles.welcomeText}>Welcome, {username}!</Text>
+        <Text style={styles.welcomeText}>Welcome, {username || 'Guest'}!</Text>
         <Text style={styles.subtitle}>Let's have fun with Dodo!</Text>
       </View>
 
-      {/* Chat messages */}
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -118,7 +347,6 @@ const ChatBotScreen = () => {
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
 
-      {/* Input */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -136,7 +364,10 @@ const ChatBotScreen = () => {
           {loading ? (
             <ActivityIndicator color="#FFF" />
           ) : (
-            <Image source={require('../assets/images/logo.png')} style={styles.sendIcon} />
+            <Image 
+              source={require('../assets/images/logo.png')} 
+              style={styles.sendIcon} 
+            />
           )}
         </TouchableOpacity>
       </View>
@@ -145,13 +376,24 @@ const ChatBotScreen = () => {
       <Modal visible={infoVisible} transparent animationType="fade">
         <View style={styles.modalContainer}>
           <View style={styles.infoModalContent}>
-            <Image source={require('../assets/images/logo.png')} style={styles.infoImage} />
+            <Image 
+              source={require('../assets/images/logo.png')} 
+              style={styles.infoImage} 
+            />
             <Text style={styles.infoTitle}>About Dodo</Text>
             <Text style={styles.infoText}>
-              This is a dummy version of Dodo chatbot. 
-              {"\n\n"}It shows how the UI works without connecting to backend.
+              Dodo is your friendly AI psychiatrist designed to help you with mental wellness.
+              {"\n\n"}
+              • Always confidential
+              {"\n"}
+              • Available 24/7
+              {"\n"}
+              • Non-judgmental support
             </Text>
-            <TouchableOpacity onPress={() => setInfoVisible(false)} style={styles.infoCloseButton}>
+            <TouchableOpacity 
+              onPress={() => setInfoVisible(false)}
+              style={styles.infoCloseButton}
+            >
               <Text style={styles.infoCloseText}>Got it!</Text>
             </TouchableOpacity>
           </View>
@@ -163,6 +405,7 @@ const ChatBotScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Chat History</Text>
+            
             {loadingHistory ? (
               <ActivityIndicator size="large" color="#6a51af" style={styles.loadingIndicator} />
             ) : (
@@ -180,64 +423,91 @@ const ChatBotScreen = () => {
                         </Text>
                         {item.text}
                       </Text>
+                      <Text style={styles.historyTime}>
+                        {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </Text>
                     </View>
                   )}
                   keyExtractor={(item, index) => index.toString()}
                   style={styles.historyList}
                   contentContainerStyle={styles.historyContent}
                 />
+                
                 {chatHistory.length > 0 && (
-                  <TouchableOpacity onPress={() => setShowDeleteAlert(true)} style={styles.delete}>
+                  <TouchableOpacity 
+                    onPress={showDeleteConfirmation}
+                    style={styles.delete}
+                  >
                     <Text style={styles.deleteText}>Delete All History</Text>
+                    {showDeleteAlert && (
+  <Modal transparent visible={showDeleteAlert} onRequestClose={handleDeleteCancel}>
+    <View style={styles.alertOverlay}>
+      <View style={styles.alertContainer}>
+        <Text style={styles.alertTitle}>Delete Chat History</Text>
+        <Text style={styles.alertMessage}>
+          Are you sure you want to delete all your chat history?
+        </Text>
+        <View style={styles.alertButtonContainer}>
+          <TouchableOpacity 
+            style={[styles.alertButton, styles.cancelButton]}
+            onPress={handleDeleteCancel}
+          >
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.alertButton, styles.deleteButton]}
+            onPress={handleDeleteConfirm}
+          >
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  </Modal>
+)}
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity onPress={() => setShowFullHistory(!showFullHistory)} style={styles.toggleHistoryButton}>
+                
+                <TouchableOpacity 
+                  onPress={toggleHistoryView} 
+                  style={styles.toggleHistoryButton}
+                >
                   <Text style={styles.toggleHistoryButtonText}>
                     {showFullHistory ? 'Show Recent' : 'View Full History'}
                   </Text>
                 </TouchableOpacity>
               </>
             )}
-            <TouchableOpacity onPress={() => setHistoryVisible(false)} style={styles.closeButton}>
+            
+            <TouchableOpacity 
+              onPress={() => {
+                setHistoryVisible(false);
+                setShowFullHistory(false);
+              }} 
+              style={styles.closeButton}
+            >
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
-
-      {/* Delete Alert */}
-      <Modal transparent visible={showDeleteAlert}>
-        <View style={styles.alertOverlay}>
-          <View style={styles.alertContainer}>
-            <Text style={styles.alertTitle}>Delete Chat History</Text>
-            <Text style={styles.alertMessage}>Are you sure you want to delete all your chat history?</Text>
-            <View style={styles.alertButtonContainer}>
-              <TouchableOpacity style={[styles.alertButton, styles.cancelButton]} onPress={() => setShowDeleteAlert(false)}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.alertButton, styles.deleteButton]} onPress={deleteChatHistory}>
-                <Text style={styles.deleteButtonText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Success Alert */}
-      <Modal transparent visible={showSuccessAlert}>
-        <View style={styles.alertOverlay}>
-          <View style={styles.alertContainer}>
-            <Text style={styles.alertTitle}>Success</Text>
-            <Text style={styles.alertMessage}>Your chat history has been deleted successfully!</Text>
-            <TouchableOpacity 
-              style={[styles.alertButton, styles.successButton]}
-              onPress={() => setShowSuccessAlert(false)}
-            >
-              <Text style={styles.successButtonText}>OK</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* Success Alert Modal */}
+<Modal transparent visible={showSuccessAlert} onRequestClose={() => setShowSuccessAlert(false)}>
+  <View style={styles.alertOverlay}>
+    <View style={styles.alertContainer}>
+      <Text style={styles.alertTitle}>Success</Text>
+      <Text style={styles.alertMessage}>
+        Your chat history has been deleted successfully!
+      </Text>
+      <TouchableOpacity 
+        style={[styles.alertButton, styles.successButton]}
+        onPress={() => setShowSuccessAlert(false)}
+      >
+        <Text style={styles.successButtonText}>OK</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
     </View>
   );
 };
