@@ -558,6 +558,64 @@ app.get('/searchEmoji', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+const DiaryEntrySchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Reference to the user
+    note: { type: String, required: true }, // Diary note content
+    createdAt: { type: Date, default: Date.now }, // Timestamp
+  });
+  
+  const DiaryEntry = mongoose.model('DiaryEntry', DiaryEntrySchema);
+  
+  app.post('/diary', async (req, res) => {
+    try {
+      const { userId, note } = req.body;
+  
+      if (!userId || !note) {
+        return res.status(400).json({ message: 'User ID and note are required' });
+      }
+  
+      const newEntry = new DiaryEntry({ userId, note });
+      await newEntry.save();
+  
+      res.status(201).json({ message: 'Diary entry saved successfully', entry: newEntry });
+    } catch (error) {
+      console.error('Error saving diary entry:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.get('/diary', async (req, res) => {
+    try {
+      const { userId } = req.query;
+  
+      if (!userId) {
+        return res.status(400).json({ message: 'User ID is required' });
+      }
+  
+      const entries = await DiaryEntry.find({ userId }).sort({ createdAt: -1 }); // Fetch entries sorted by date
+      res.status(200).json(entries);
+    } catch (error) {
+      console.error('Error fetching diary entries:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.delete('/diary/:id', async (req, res) => {
+    try {
+      const { id } = req.params; // Get entry ID from the URL
+  
+      const deletedEntry = await DiaryEntry.findByIdAndDelete(id);
+  
+      if (!deletedEntry) {
+        return res.status(404).json({ message: 'Diary entry not found' });
+      }
+  
+      res.status(200).json({ message: 'Diary entry deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting diary entry:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
 
 
 // Start Server
