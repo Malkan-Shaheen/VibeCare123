@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import axios from 'axios';
-import {API_BASE_URL} from '../config/api';
+import {API_BASE_URL} from 'e:/ReactNative-Final/ReactNative/VibeCare/config/api';
 
 const AddStoryScreen = ({ navigation, route }) => {
     const { userId } = route.params; // Access userId from navigation params
