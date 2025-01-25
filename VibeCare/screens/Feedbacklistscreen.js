@@ -1,44 +1,155 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   FlatList,
   StyleSheet,
+  ActivityIndicator,
   TouchableOpacity,
+  Modal,
 } from "react-native";
+import axios from "axios";
 import Icon from "react-native-vector-icons/MaterialIcons";
-
-const dummyFeedbacks = [
-  {
-    _id: "1",
-    userId: "User123",
-    rating: 5,
-    selectedImprovement: "UI/UX",
-    feedback: "Great app, but UI can be smoother!",
-    createdAt: "2025-09-21T10:00:00Z",
-    responded: false,
-  },
-  {
-    _id: "2",
-    userId: "User456",
-    rating: 4,
-    selectedImprovement: "Performance",
-    feedback: "App is good but a bit slow.",
-    createdAt: "2025-09-20T15:30:00Z",
-    responded: true,
-  },
-];
+import { API_BASE_URL } from '../config/api';
 
 const FeedbackListScreen = ({ navigation }) => {
-  const [feedbacks] = useState(dummyFeedbacks);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    title: "",
+    message: "",
+    type: "info",
+    onConfirm: () => {},
+  });
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Screen was focused, refresh data
+      fetchFeedbacks();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  const showAlert = (title, message, type = "info", onConfirm = () => {}) => {
+    setAlertConfig({ title, message, type, onConfirm });
+    setAlertVisible(true);
+  };
+
+  const hideAlert = () => setAlertVisible(false);
+
+  const fetchFeedbacks = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/feedbacks`);
+      setFeedbacks(response.data);
+    } catch (error) {
+      showAlert("Error", "Failed to fetch feedbacks", "error");
+      console.error("❌ Error fetching feedbacks:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = (id) => {
+    showAlert(
+      "Delete Feedback",
+      "Are you sure you want to delete this feedback?",
+      "warning",
+      async () => {
+        try {
+          await axios.delete(`${API_BASE_URL}/feedbacks/${id}`);
+          setFeedbacks(feedbacks.filter((item) => item._id !== id));
+          showAlert("Success", "Feedback deleted successfully", "success");
+        } catch (error) {
+          showAlert("Error", "Failed to delete feedback", "error");
+          console.error("❌ Error deleting feedback:", error);
+        }
+      }
+    );
+  };
+
+  const handleRespond = async (id) => {
+    try {
+      // Make API call to update response status
+      const response = await axios.put(`${API_BASE_URL}/feedbacks/${id}/respond`);
+      
+      // Update the local state with the responded status from the server
+      setFeedbacks(feedbacks.map(item => 
+        item._id === id ? {...item, responded: true} : item
+      ));
+      
+      showAlert("Success", "Feedback status updated to Responded", "success");
+    } catch (error) {
+      showAlert("Error", "Failed to update feedback status", "error");
+      console.error("❌ Error updating feedback status:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="purple" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
+      {/* Custom Alert Component */}
+      <Modal visible={alertVisible} transparent animationType="fade">
+        <View style={styles.alertOverlay}>
+          <View style={[
+            styles.alertBox,
+            alertConfig.type === "error" && styles.errorAlert,
+            alertConfig.type === "success" && styles.successAlert,
+            alertConfig.type === "warning" && styles.warningAlert
+          ]}>
+            <Icon 
+              name={
+                alertConfig.type === "error" ? "error" :
+                alertConfig.type === "success" ? "check-circle" :
+                "warning"
+              } 
+              size={40} 
+              color={
+                alertConfig.type === "error" ? "#dc3545" :
+                alertConfig.type === "success" ? "#28a745" :
+                "#ffc107"
+              } 
+            />
+            <Text style={styles.alertTitle}>{alertConfig.title}</Text>
+            <Text style={styles.alertMessage}>{alertConfig.message}</Text>
+            <View style={styles.alertButtons}>
+              {alertConfig.type === "warning" && (
+                <TouchableOpacity
+                  style={[styles.alertButton, styles.cancelButton]}
+                  onPress={hideAlert}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                style={[styles.alertButton, styles.confirmButton]}
+                onPress={() => {
+                  alertConfig.onConfirm();
+                  hideAlert();
+                }}
+              >
+                <Text style={styles.buttonText}>
+                  {alertConfig.type === "warning" ? "Confirm" : "OK"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Header Section */}
       <View style={styles.headerWrapper}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate("WelcomeScreen")}
         >
           <Icon name="arrow-back" size={24} color="purple" />
         </TouchableOpacity>
@@ -56,7 +167,7 @@ const FeedbackListScreen = ({ navigation }) => {
             <View style={styles.feedbackCard}>
               <View style={styles.feedbackHeader}>
                 <Text style={styles.userId}>User: {item.userId}</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDelete(item._id)}>
                   <Icon name="delete" size={22} color="red" />
                 </TouchableOpacity>
               </View>
@@ -66,18 +177,15 @@ const FeedbackListScreen = ({ navigation }) => {
                   🔧 Improvement: {item.selectedImprovement}
                 </Text>
               )}
-              {item.feedback && (
-                <Text style={styles.feedbackText}>📝 {item.feedback}</Text>
-              )}
-              <Text style={styles.date}>
-                📅 {new Date(item.createdAt).toLocaleString()}
-              </Text>
-
-              <TouchableOpacity
+              {item.feedback && <Text style={styles.feedbackText}>📝 {item.feedback}</Text>}
+              <Text style={styles.date}>📅 {new Date(item.createdAt).toLocaleString()}</Text>
+              
+              <TouchableOpacity 
                 style={[
-                  styles.respondButton,
-                  item.responded && styles.respondedButton,
-                ]}
+                  styles.respondButton, 
+                  item.responded && styles.respondedButton
+                ]} 
+                onPress={() => handleRespond(item._id)}
                 disabled={item.responded}
               >
                 <Text style={styles.buttonText}>
@@ -106,6 +214,11 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 15,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     fontSize: 30,
@@ -169,6 +282,61 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  alertOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  alertBox: {
+    backgroundColor: "white",
+    padding: 25,
+    borderRadius: 15,
+    width: "80%",
+    alignItems: "center",
+  },
+  errorAlert: {
+    borderLeftWidth: 5,
+    borderColor: "#dc3545",
+  },
+  successAlert: {
+    borderLeftWidth: 5,
+    borderColor: "#28a745",
+  },
+  warningAlert: {
+    borderLeftWidth: 5,
+    borderColor: "#ffc107",
+  },
+  alertTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginVertical: 10,
+    color: "#333",
+  },
+  alertMessage: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#666",
+    marginBottom: 20,
+  },
+  alertButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  alertButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    marginHorizontal: 5,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#6c757d",
+  },
+  confirmButton: {
+    backgroundColor: "purple",
   },
 });
 

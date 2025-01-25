@@ -789,6 +789,170 @@ app.get("/get-user-chats/:userId", async (req, res) => {
 });
 
 
+const FeedbackSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    rating: { type: Number, required: false },
+    selectedImprovement: { type: String, required: false },
+    feedback: { type: String, required: false },
+    ticketNumber: { type: String, required: true, unique: true }, // Unique ticket ID
+    adminResponse: { type: String, default: '' }, // Admin's reply
+    status: { type: String, enum: ['Open', 'Closed'], default: 'Open' }, // Ticket status
+    responded: {
+    type: Boolean,
+    default: false
+  },
+  }, { timestamps: true });
+  
+  const Feedback = mongoose.model('Feedback', FeedbackSchema);
+  
+  // Route to Submit Feedback
+  app.post('/submit-feedback', async (req, res) => {
+    try {
+      const { userId, rating, selectedImprovement, feedback, ticketNumber } = req.body;
+  
+      if (!userId || !ticketNumber) {
+        return res.status(400).json({ message: 'User ID and Ticket Number are required' });
+      }
+  
+      const newFeedback = new Feedback({
+        userId,
+        rating,
+        selectedImprovement,
+        feedback,
+        ticketNumber
+      });
+  
+      await newFeedback.save();
+  
+      res.status(201).json({ message: 'Feedback submitted successfully', ticketNumber });
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  // Get all open feedback tickets
+  app.get('/tickets', async (req, res) => {
+    try {
+      const tickets = await Feedback.find({ status: 'Open' }).populate('userId', 'email'); 
+      res.status(200).json(tickets);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  // Admin responds to a ticket
+  app.post('/respond/:ticketNumber', async (req, res) => {
+    try {
+      const { ticketNumber } = req.params;
+      const { adminResponse } = req.body;
+  
+      if (!adminResponse) {
+        return res.status(400).json({ message: 'Response is required' });
+      }
+  
+      const ticket = await Feedback.findOne({ ticketNumber });
+  
+      if (!ticket) {
+        return res.status(404).json({ message: 'Ticket not found' });
+      }
+  
+     ticket.adminResponse = adminResponse;
+    ticket.status = 'Closed';
+    ticket.responded = true; // Add this line
+    await ticket.save();
+
+  
+      res.status(200).json({ message: 'Response saved successfully', ticket });
+    } catch (error) {
+      console.error('Error responding to ticket:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  // Route to Fetch All Feedbacks
+  app.get('/feedbacks', async (req, res) => {
+    try {
+      const feedbacks = await Feedback.find().sort({ createdAt: -1 });
+      res.json(feedbacks);
+    } catch (error) {
+      console.error('❌ Error fetching feedbacks:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+  app.delete('/feedbacks/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await Feedback.findByIdAndDelete(id);
+      res.status(200).json({ message: 'Feedback deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+ 
+
+// Update feedback with admin response
+app.put('/feedbacks/:id/response', async (req, res) => {
+    const { response } = req.body;
+    try {
+        const feedback = await Feedback.findByIdAndUpdate(
+            req.params.id,
+            { response ,
+        responded: true },
+            { new: true }
+        );
+        if (!feedback) {
+            return res.status(404).send({ status: "error", message: "Feedback not found" });
+        }
+        res.send({ status: "success", message: "Response submitted successfully", feedback });
+    } catch (error) {
+        console.error("Error submitting response:", error);
+        res.status(500).send({ status: "error", message: "Internal server error" });
+    }
+});
+app.get('/feedback-status/:userId', async (req, res) => {
+  try {
+      const { userId } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+          return res.status(400).json({ status: "error", message: "Invalid user ID" });
+      }
+
+      // Find the latest feedback entry for this user
+      const feedback = await Feedback.findOne({ userId }).sort({ createdAt: -1 });
+
+      if (!feedback) {
+          return res.status(404).json({ status: "error", message: "No feedback found for this user" });
+      }
+
+      res.json({ status: "success", feedback });
+  } catch (error) {
+      console.error("Error fetching feedback status:", error);
+      res.status(500).json({ status: "error", message: "Internal server error" });
+  }
+});
+app.put('/feedbacks/:id/respond', async (req, res) => {
+  try {
+      const updatedFeedback = await Feedback.findByIdAndUpdate(
+          req.params.id,
+          { status: "Closed" ,
+            responded: true
+          }, // Ensure your schema has a "status" field
+          { new: true }
+      );
+      if (!updatedFeedback) {
+          return res.status(404).json({ error: "Feedback not found" });
+      }
+      res.json(updatedFeedback);
+  } catch (error) {
+      console.error("Server Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+
 
 // Start Server
 const PORT = 3000;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,22 @@ import {
   TextInput,
   StyleSheet,
   Modal,
+  Dimensions,
 } from 'react-native';
+import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
+
+const screenWidth = Dimensions.get('window').width;
 
 const FeedbackScreen = ({ navigation, route }) => {
+  console.log("User ID in feedback screen:", route.params.userId); // Debugging
   const { userId } = route.params || {};
   const [rating, setRating] = useState(0);
   const [selectedImprovement, setSelectedImprovement] = useState(null);
   const [feedback, setFeedback] = useState('');
   const [currentPage, setCurrentPage] = useState('Feedback');
   const [ticketNumber, setTicketNumber] = useState(null);
+  const [feedbackStatus, setFeedbackStatus] = useState("Pending");
 
   // ✅ custom alert state
   const [alertVisible, setAlertVisible] = useState(false);
@@ -25,6 +32,32 @@ const FeedbackScreen = ({ navigation, route }) => {
     setAlertTitle(title);
     setAlertMessage(message);
     setAlertVisible(true);
+  };
+
+  // Fetch feedback status
+  const fetchFeedbackStatus = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/feedback-status/${userId}`);
+      console.log("Response from backend:", response.data);
+
+      if (response.data.feedback?.status) {
+        setFeedbackStatus(response.data.feedback.status);
+        showAlert(
+          "Feedback Status",
+          response.data.feedback.status === "Closed"
+            ? "Your feedback has been responded to!"
+            : "Your feedback is still pending."
+        );
+      } else {
+        showAlert("Feedback Status", "No feedback found. Please submit one to check the status.");
+      }
+    } catch (error) {
+      if (error.response?.status === 404) {
+        showAlert("Feedback Status", "No feedback found. Please submit one to check the status.");
+      } else {
+        showAlert("Error", "Unable to check feedback status. Try again later.");
+      }
+    }
   };
 
   // Improvement options
@@ -47,7 +80,15 @@ const FeedbackScreen = ({ navigation, route }) => {
     return `TCK-${Math.floor(100000 + Math.random() * 900000)}`;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    console.log("Submitting feedback...");
+    console.log("User ID:", userId);
+
+    if (!userId) {
+      showAlert("Error", "User ID not found.");
+      return;
+    }
+
     if (rating === 0 && !selectedImprovement && !feedback.trim()) {
       showAlert("Incomplete Feedback", "Please fill at least one field before submitting.");
       return;
@@ -56,16 +97,23 @@ const FeedbackScreen = ({ navigation, route }) => {
     const ticket = generateTicketNumber();
     setTicketNumber(ticket);
 
-    // Just simulate success
-    setCurrentPage('ThankYouScreen');
-  };
+    try {
+      await axios.post(`${API_BASE_URL}/submit-feedback`, {
+        userId,
+        rating,
+        selectedImprovement: selectedImprovement
+          ? improvementOptions.find((option) => option.id === selectedImprovement)?.label
+          : null,
+        feedback,
+        ticketNumber: ticket,
+      });
 
-  const fetchFeedbackStatus = () => {
-    // Dummy simulation
-    showAlert(
-      "Feedback Status",
-      "Your feedback is still pending. (Dummy data)"
-    );
+      console.log("Feedback submitted successfully!");
+      setCurrentPage('ThankYouScreen');
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      showAlert("Error", "Failed to submit feedback. Please try again.");
+    }
   };
 
   // ✅ Thank You Screen
@@ -294,3 +342,4 @@ const styles = StyleSheet.create({
 });
 
 export default FeedbackScreen;
+
