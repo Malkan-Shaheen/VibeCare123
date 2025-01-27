@@ -950,7 +950,59 @@ app.put('/feedbacks/:id/respond', async (req, res) => {
       res.status(500).json({ error: "Internal server error" });
   }
 });
+const SuccessStorySchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Reference to the user who posted the story
+  title: { type: String, required: true },
+  subtitle: { type: String, required: true },
+  story: { type: String, required: true }, // Full story content
+  createdAt: { type: Date, default: Date.now }, // Timestamp
+});
 
+const SuccessStory = mongoose.model('SuccessStory', SuccessStorySchema);
+
+app.get('/success-stories', async (req, res) => {
+  try {
+    const stories = await SuccessStory.find().sort({ createdAt: -1 }); // Fetch all stories sorted by date
+    res.status(200).json(stories);
+  } catch (error) {
+    console.error('Error fetching stories:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/success-stories', async (req, res) => {
+  try {
+    const { userId, title, subtitle, story } = req.body;
+
+    if (!userId || !title || !subtitle || !story) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const newStory = new SuccessStory({
+      userId,
+      title,
+      subtitle,
+      story,
+    });
+
+    await newStory.save();
+    res.status(201).json({ message: 'Story added successfully', story: newStory });
+  } catch (error) {
+    console.error('Error adding story:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.delete('/success-stories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await SuccessStory.findByIdAndDelete(id);
+    res.status(200).json({ message: 'Story deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting story:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 
