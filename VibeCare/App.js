@@ -10,14 +10,10 @@ import { UserPreferencesProvider } from './UserPreferencesContext';
 import WelcomeScreen from './screens/WelcomeScreen';
 import SignupScreen from './screens/SignupScreen';
 import SigninScreen from './screens/SigninScreen';
-import InfoScreen from './screens/InfoScreen';
 import PrivacyScreen from './screens/PrivacyScreen';
-import MyAccount from './screens/MyAccount';
-import AboutScreen from './screens/AboutScreen';
 import SuccessStoriesScreen from './screens/SuccessStoriesScreen';
 import ExploreScreen from './screens/ExploreScreen';
 import GenderSelectionScreen from './screens/GenderSelectionScreen';
-import AgeFPage from './screens/AgeFPage';
 import AgeSelectionScreen from './screens/AgeMPage';
 import Relation from './screens/Relation';
 import LivingSituationPage from './screens/LivingSituationPage';
@@ -26,7 +22,7 @@ import ChatBotScreen from './screens/ChatbotScreen';
 import FeedbackScreen from './screens/FeedbackScreen';
 import FeedbackScreen1 from './screens/FeedbackScreen1';
 import PersonalExplorer from './screens/PersonalExplorer';
-import Dairy from './screens/Dairy';
+import Dairy from './screens/Diary';
 import CatchesYourEye from './screens/CatchesYourEye';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import ResetPasswordScreen from './screens/ResetPasswordScreen';
@@ -34,7 +30,6 @@ import VerifyOtpScreen from './screens/VerifyOtpScreen';
 import VerifyEmailOtpScreen from './screens/VerifyEmailOtpScreen';
 import EmojiDetailScreen from './screens/EmojiDetailScreen';
 import EmojiScreen1 from './screens/EmojiScreen1';
-import HelpSupportScreen from './screens/HelpSupportScreen'; 
 import DepressionQuiz from './screens/DepressionQuiz';
 import AdminSignIn from './screens/admin';
 import EditProfileScreen from './screens/EditProfile';
@@ -61,6 +56,7 @@ import VCHistoryScreen from './screens/VCHistoryScreen';
 import AdminVCHistoryScreen from './screens/AdminVCHistoryScreen';
 import AdminSuccessStoriesScreen from './screens/AdminSuccessStoriesScreen';
 import AdminUserProfileManagementScreen from './screens/AdminUserProfileManagementScreen';
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -134,14 +130,10 @@ export default function App() {
             <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
             <Stack.Screen name="SignupScreen" component={SignupScreen} />
             <Stack.Screen name="SigninScreen" component={SigninScreen} />
-            <Stack.Screen name="InfoScreen" component={InfoScreen} />
             <Stack.Screen name="PrivacyScreen" component={PrivacyScreen} />
-            <Stack.Screen name="MyAccount" component={MyAccount} />
-            <Stack.Screen name="AboutScreen" component={AboutScreen} />
             <Stack.Screen name="SuccessStoriesScreen" component={SuccessStoriesScreen} />
             <Stack.Screen name="ExploreScreen" component={ExploreScreen} />
             <Stack.Screen name="GenderSelectionScreen" component={GenderSelectionScreen} />
-            <Stack.Screen name="AgeFPage" component={AgeFPage} />
             <Stack.Screen name="AgeSelectionScreen" component={AgeSelectionScreen} />
             <Stack.Screen name="Relation" component={Relation} />
             <Stack.Screen name="LivingSituationPage" component={LivingSituationPage} />
@@ -158,7 +150,6 @@ export default function App() {
             <Stack.Screen name="VerifyOtpScreen" component={VerifyOtpScreen} />
             <Stack.Screen name="VerifyEmailOtpScreen" component={VerifyEmailOtpScreen} />
             <Stack.Screen name="EmojiDetailScreen" component={EmojiDetailScreen} />
-            <Stack.Screen name="HelpSupportScreen" component={HelpSupportScreen} />
             <Stack.Screen name="AdminSignIn" component={AdminSignIn} />
             <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
             <Stack.Screen name="FeedbackListScreen" component={FeedbackListScreen} />
