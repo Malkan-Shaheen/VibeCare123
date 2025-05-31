@@ -17,7 +17,10 @@ const WelcomeScreen = () => {
     navigation.navigate('AdminSignIn');
   };
 
- 
+  const handleCaretakerLogin = () => {
+    setShowDropdown(false);
+    navigation.navigate('CaretakerSignIn'); // Make sure this screen exists in navigation
+  };
 
   return (
     <View style={styles.container}>
@@ -46,7 +49,9 @@ const WelcomeScreen = () => {
             <TouchableOpacity style={styles.dropdownItem} onPress={handleAdminLogin}>
               <Text style={styles.dropdownText}>Login as Admin</Text>
             </TouchableOpacity>
-      
+            <TouchableOpacity style={styles.dropdownItem} onPress={handleCaretakerLogin}>
+              <Text style={styles.dropdownText}>Login as Caretaker</Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>

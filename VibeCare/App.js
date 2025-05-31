@@ -56,6 +56,8 @@ import VCHistoryScreen from './screens/VCHistoryScreen';
 import AdminVCHistoryScreen from './screens/AdminVCHistoryScreen';
 import AdminSuccessStoriesScreen from './screens/AdminSuccessStoriesScreen';
 import AdminUserProfileManagementScreen from './screens/AdminUserProfileManagementScreen';
+import caretakerdashboard from './screens/caretakerdashboard';
+import CaretakerSignIn from './screens/CaretakersignIn';
 
 
 const Stack = createStackNavigator();
@@ -175,6 +177,10 @@ export default function App() {
             <Stack.Screen name='AdminVCHistoryScreen' component={AdminVCHistoryScreen} />
             <Stack.Screen name='AdminSuccessStoriesScreen' component={AdminSuccessStoriesScreen} />
             <Stack.Screen name="AdminUserProfileManagementScreen" component={AdminUserProfileManagementScreen} />
+            <Stack.Screen name='caretakerdashboard' component={caretakerdashboard} />
+            <Stack.Screen name='CaretakerSignIn' component={CaretakerSignIn} />
+         
+         
           </Stack.Navigator>
         </NavigationContainer>
       </UserPreferencesProvider>

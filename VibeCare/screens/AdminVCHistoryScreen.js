@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL } from 'e:/ReactNative-Final/ReactNative/VibeCare/config/api';
 
 const VCHistoryScreen = () => {
   const route = useRoute();
